@@ -1,0 +1,537 @@
+{% extends "accounts/base.html" %}
+{% block title %}Missing Persons Database - LocateNow{% endblock %}
+
+{% block content %}
+<style>
+    /* Missing Persons Styles */
+    :root {
+        --primary-color: #2c3e50;
+        --secondary-color: #3498db;
+        --accent-color: #e74c3c;
+        --success-color: #27ae60;
+        --warning-color: #f39c12;
+        --light-color: #f8f9fa;
+        --dark-color: #2c3e50;
+        --text-color: #34495e;
+        --text-light: #7f8c8d;
+        --shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        --shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.12);
+        --transition: all 0.3s ease;
+        --border-radius: 12px;
+    }
+
+    .missing-persons-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0.5rem 2rem 2rem 2rem;
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    /* Page Header */
+    .page-header {
+        margin-bottom: 2rem;
+        text-align: left;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+        position: relative;
+        display: inline-block;
+    }
+
+    .page-header h1::after {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(90deg, var(--accent-color), #f1c40f);
+        border-radius: 2px;
+    }
+
+    /* Search & Filter Section */
+    .search-filter-section {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        padding: 1.2rem 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        animation: slideDown 0.5s ease-out 0.2s both;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 1rem;
+    }
+
+    .section-icon {
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, var(--accent-color), #ff5e62);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1rem;
+    }
+
+    .section-title h2 {
+        font-size: 1.2rem;
+        color: var(--primary-color);
+        margin: 0;
+        font-weight: 600;
+    }
+
+    .search-container {
+        display: flex;
+        gap: 0.8rem;
+    }
+
+    .search-input {
+        flex: 1;
+        padding: 0.7rem 1.2rem;
+        font-size: 0.95rem;
+        border: 2px solid #e1e5eb;
+        border-radius: var(--border-radius);
+        transition: var(--transition);
+        background: #f8f9fa;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        background: white;
+    }
+
+    .search-btn {
+        padding: 0.7rem 1.5rem;
+        background: linear-gradient(135deg, var(--accent-color), #ff5e62);
+        color: white;
+        border: none;
+        border-radius: var(--border-radius);
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.95rem;
+    }
+
+    /* Persons List */
+    .persons-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    /* Person List Item */
+    .person-item {
+        display: flex;
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        transition: var(--transition);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        animation: itemAppear 0.5s ease-out;
+        animation-fill-mode: both;
+        padding: 1.2rem;
+        gap: 1.5rem;
+        align-items: center;
+    }
+
+    @keyframes itemAppear {
+        from {
+            opacity: 0;
+            transform: translateX(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .person-item:hover {
+        transform: scale(1.01);
+        box-shadow: var(--shadow-hover);
+    }
+
+    .person-photo-container {
+        width: 180px;
+        height: 180px;
+        flex-shrink: 0;
+        position: relative;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+    }
+
+    .person-photo {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .item-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+
+    .item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+    .item-info h3 {
+        font-size: 1.5rem;
+        color: var(--primary-color);
+        margin: 0 0 0.3rem 0;
+        font-weight: 700;
+    }
+
+    .item-meta {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .meta-tag {
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .tag-status {
+        background: rgba(231, 76, 60, 0.1);
+        color: var(--accent-color);
+        border: 1px solid rgba(231, 76, 60, 0.2);
+    }
+
+    .tag-age {
+        background: rgba(52, 152, 219, 0.1);
+        color: var(--secondary-color);
+    }
+
+    .tag-id {
+        background: #f8f9fa;
+        color: var(--text-light);
+        font-family: monospace;
+    }
+
+    .item-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .detail-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.95rem;
+        color: var(--text-color);
+    }
+
+    .detail-row i {
+        color: var(--accent-color);
+        width: 16px;
+    }
+
+    .item-description {
+        color: var(--text-light);
+        font-size: 0.95rem;
+        line-height: 1.5;
+        margin: 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .item-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.5rem;
+    }
+
+    .item-time {
+        font-size: 0.85rem;
+        color: var(--text-light);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .item-actions {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .btn-contact {
+        padding: 0.6rem 1.5rem;
+        background: linear-gradient(135deg, var(--secondary-color), #2980b9);
+        color: white;
+        border-radius: var(--border-radius);
+        text-decoration: none;
+        font-weight: 600;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9rem;
+    }
+
+    .btn-contact:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+    }
+
+    /* Empty State */
+    .empty-state {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        border: 2px dashed #e1e5eb;
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        color: #e1e5eb;
+        margin-bottom: 1.5rem;
+    }
+
+    .empty-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0.9rem 2rem;
+        font-size: 1rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, var(--accent-color), #ff5e62);
+        color: white;
+        border: none;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        transition: var(--transition);
+        text-decoration: none;
+    }
+
+    /* Pagination */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 3rem;
+    }
+
+    .page-btn {
+        width: 40px;
+        height: 40px;
+        border: 2px solid #e1e5eb;
+        background: white;
+        color: var(--text-color);
+        border-radius: var(--border-radius);
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+    }
+
+    .page-btn:hover,
+    .page-btn.active {
+        border-color: var(--accent-color);
+        color: var(--accent-color);
+    }
+
+    .page-btn.active {
+        background: var(--accent-color);
+        color: white;
+    }
+
+    @media (max-width: 992px) {
+        .person-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .person-photo-container {
+            width: 100%;
+            height: 250px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .search-container {
+            flex-direction: column;
+        }
+
+        .item-header {
+            flex-direction: column;
+            gap: 10px;
+        }
+    }
+</style>
+
+<div class="missing-persons-container">
+    <div class="page-header">
+        <h1>Missing Persons Database</h1>
+    </div>
+
+    <div class="search-filter-section">
+        <div class="section-title">
+            <div class="section-icon">
+                <i class="fas fa-search"></i>
+            </div>
+            <h2>Search Database</h2>
+        </div>
+
+        <div class="search-container">
+            <input type="text" class="search-input" id="searchInput"
+                placeholder="Search by name, location, or description...">
+            <button class="search-btn" id="searchBtn">
+                <i class="fas fa-search"></i>
+                Search
+            </button>
+        </div>
+    </div>
+
+    <div class="persons-list" id="personsGrid">
+        {% for person in missing_list %}
+        <div class="person-item">
+            <div class="person-photo-container">
+                {% if person.photo %}
+                <img src="{{ person.photo.url }}" alt="{{ person.name }}" class="person-photo">
+                {% else %}
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23f0f2f5'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='20' fill='%23999' text-anchor='middle' dy='.3em'%3ENo Photo%3C/text%3E%3C/svg%3E"
+                    alt="No photo" class="person-photo">
+                {% endif %}
+            </div>
+
+            <div class="item-content">
+                <div class="item-header">
+                    <div class="item-info">
+                        <h3>{{ person.name }}</h3>
+                        <div class="item-meta">
+                            <span class="meta-tag tag-status">Currently Missing</span>
+                            {% if person.age %}
+                            <span class="meta-tag tag-age">Age: {{ person.age }}</span>
+                            {% endif %}
+                            <span class="meta-tag tag-id">ID: MP-{{ forloop.counter|stringformat:"04d" }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="item-details">
+                    <div class="detail-row">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <strong>Last Seen:</strong> {{ person.last_seen_location }}
+                    </div>
+                </div>
+
+                <p class="item-description">
+                    {{ person.description|truncatechars:200 }}
+                </p>
+
+                <div class="item-footer">
+                    <div class="item-time">
+                        <i class="far fa-clock"></i>
+                        Reported {{ person.reported_at|timesince }} ago
+                    </div>
+                    <div class="item-actions">
+                        <a href="{% url 'open_chat' person.user.id %}" class="btn-contact">
+                            <i class="fas fa-comments"></i>
+                            Contact Reporter
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-search-minus"></i>
+            </div>
+            <h3>No Missing Persons Reported</h3>
+            <p>There are no active missing person reports at the moment.</p>
+            <a href="{% url 'report_missing' %}" class="empty-btn">
+                <i class="fas fa-plus"></i>
+                Report Missing Person
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if page_obj and page_obj.paginator.num_pages > 1 %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a class="page-btn" href="?page={{ page_obj.previous_page_number }}"><i class="fas fa-chevron-left"></i></a>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+        <a class="page-btn {% if page_obj.number == num %}active{% endif %}" href="?page={{ num }}">{{ num }}</a>
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <a class="page-btn" href="?page={{ page_obj.next_page_number }}"><i class="fas fa-chevron-right"></i></a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    document.getElementById('searchBtn').addEventListener('click', function () {
+        const query = document.getElementById('searchInput').value.toLowerCase();
+        const items = document.querySelectorAll('.person-item');
+
+        items.forEach(item => {
+            const text = item.textContent.toLowerCase();
+            item.style.display = text.includes(query) ? 'flex' : 'none';
+        });
+    });
+</script>
+{% endblock %}

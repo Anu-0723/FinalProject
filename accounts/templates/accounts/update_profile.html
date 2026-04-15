@@ -1,0 +1,235 @@
+{% extends "accounts/base.html" %}
+{% block title %}Update Profile - LocateNow{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-color: #2c3e50;
+        --secondary-color: #3498db;
+        --accent-color: #e74c3c;
+        --light-color: #f8f9fa;
+        --text-color: #34495e;
+        --text-light: #7f8c8d;
+        --shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        --border-radius: 12px;
+    }
+
+    .profile-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .profile-card {
+        background: #ffffff;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        padding: 2.5rem;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+    }
+
+    .profile-header {
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.5rem;
+    }
+
+    .profile-title h1 {
+        font-size: 2rem;
+        color: var(--primary-color);
+        margin-bottom: 0.4rem;
+    }
+
+    .profile-title p {
+        color: var(--text-light);
+        font-size: 0.95rem;
+    }
+
+    .profile-avatar {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: var(--secondary-color);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.6rem;
+        font-weight: 700;
+    }
+
+    .profile-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem 2rem;
+        margin-top: 1rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+
+    .form-group.full {
+        grid-column: 1 / -1;
+    }
+
+    label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="file"] {
+        padding: 0.7rem 0.9rem;
+        border-radius: 10px;
+        border: 1px solid #d1d5db;
+        font-size: 0.95rem;
+        width: 100%;
+    }
+
+    input:focus {
+        outline: none;
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.18);
+    }
+
+    .help-text {
+        font-size: 0.8rem;
+        color: var(--text-light);
+    }
+
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 0.1rem 0 0;
+        color: var(--accent-color);
+        font-size: 0.82rem;
+    }
+
+    .profile-actions {
+        margin-top: 2.2rem;
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+    }
+
+    .btn {
+        padding: 0.8rem 1.6rem;
+        border-radius: 999px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.95rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .btn-secondary {
+        background: #e5e7eb;
+        color: var(--text-color);
+    }
+
+    .btn-primary {
+        background: var(--secondary-color);
+        color: #ffffff;
+    }
+
+    .btn-primary:hover {
+        filter: brightness(0.95);
+    }
+
+    @media (max-width: 768px) {
+        .profile-container {
+            padding: 1.5rem 1rem;
+        }
+
+        .profile-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="profile-container">
+    <div class="profile-card">
+        <div class="profile-header">
+            <div class="profile-title">
+                <h1>Update Profile</h1>
+                <p>Keep your contact and location details up to date.</p>
+            </div>
+            <div class="profile-avatar">
+                {{ request.user.username|slice:":1"|upper }}
+            </div>
+        </div>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="profile-grid">
+                <div class="form-group">
+                    <label for="id_username">Username</label>
+                    {{ form.username }}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_email">Email</label>
+                    {{ form.email }}
+                </div>
+
+                <div class="form-group full">
+                    <label for="id_full_name">Full name</label>
+                    {{ form.full_name }}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_mobile">Mobile number</label>
+                    {{ form.mobile }}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_city">City</label>
+                    {{ form.city }}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_district">District</label>
+                    {{ form.district }}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_state">State</label>
+                    {{ form.state }}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_country">Country</label>
+                    {{ form.country }}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_pincode">Pincode</label>
+                    {{ form.pincode }}
+                </div>
+
+            </div>
+
+            <div class="profile-actions">
+                <button type="button" class="btn btn-secondary" onclick="window.history.back()">
+                    Cancel
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i>
+                    Save changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

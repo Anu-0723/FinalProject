@@ -1,0 +1,1167 @@
+{% extends "accounts/base.html" %}
+{% block title %}Match Results - LocateNow{% endblock %}
+
+{% block content %}
+<style>
+    /* Match Results Styles */
+    :root {
+        --primary-color: #2c3e50;
+        --secondary-color: #3498db;
+        --accent-color: #e74c3c;
+        --success-color: #27ae60;
+        --warning-color: #f39c12;
+        --light-color: #f8f9fa;
+        --dark-color: #2c3e50;
+        --text-color: #34495e;
+        --text-light: #7f8c8d;
+        --shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        --shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.12);
+        --transition: all 0.3s ease;
+        --border-radius: 12px;
+    }
+
+    .match-results-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    /* Page Header */
+    .page-header {
+        margin-bottom: 3rem;
+        text-align: center;
+        position: relative;
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+        font-weight: 700;
+        position: relative;
+        display: inline-block;
+    }
+
+    .page-header h1::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 120px;
+        height: 4px;
+        background: linear-gradient(90deg, var(--warning-color), #f1c40f);
+        border-radius: 2px;
+    }
+
+    .mode-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0.8rem 1.5rem;
+        background: linear-gradient(135deg, var(--warning-color), #f1c40f);
+        color: white;
+        border-radius: 30px;
+        font-weight: 600;
+        margin-top: 1rem;
+        box-shadow: 0 4px 12px rgba(243, 156, 18, 0.3);
+    }
+
+    .mode-indicator i {
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.1);
+        }
+    }
+
+    /* Results Info Bar */
+    .results-info {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        padding: 1.5rem 2rem;
+        margin-bottom: 3rem;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        animation: slideDown 0.5s ease-out 0.2s both;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .info-item {
+        text-align: center;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: var(--border-radius);
+        border: 2px solid #e1e5eb;
+        transition: var(--transition);
+    }
+
+    .info-item:hover {
+        border-color: var(--warning-color);
+        transform: translateY(-3px);
+    }
+
+    .info-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .info-label {
+        font-size: 0.9rem;
+        color: var(--text-light);
+        font-weight: 500;
+    }
+
+    /* Match Cards Grid */
+    .match-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 2rem;
+    }
+
+    /* Match Card */
+    .match-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        transition: var(--transition);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+        animation: cardAppear 0.6s ease-out;
+        animation-fill-mode: both;
+    }
+
+    @keyframes cardAppear {
+        from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.95);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .match-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: var(--shadow-hover);
+    }
+
+    .match-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 6px;
+        background: linear-gradient(90deg, var(--warning-color), #f1c40f);
+        z-index: 1;
+    }
+
+    .match-rank {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, var(--warning-color), #f1c40f);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        z-index: 2;
+    }
+
+    .match-rank::after {
+        content: '';
+        position: absolute;
+        top: -4px;
+        left: -4px;
+        right: -4px;
+        bottom: -4px;
+        border: 2px solid rgba(243, 156, 18, 0.3);
+        border-radius: 50%;
+        animation: pulseRing 2s infinite;
+    }
+
+    @keyframes pulseRing {
+        0% {
+            transform: scale(0.8);
+            opacity: 1;
+        }
+
+        100% {
+            transform: scale(1.2);
+            opacity: 0;
+        }
+    }
+
+    .match-image {
+        position: relative;
+        height: 250px;
+        overflow: hidden;
+    }
+
+    .match-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: var(--transition);
+    }
+
+    .match-card:hover .match-image img {
+        transform: scale(1.05);
+    }
+
+    .image-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.3));
+    }
+
+    .no-photo {
+        width: 100%;
+        height: 100%;
+        background: #f0f2f5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #999;
+        font-size: 4rem;
+    }
+
+    .match-content {
+        padding: 1.8rem;
+    }
+
+    .match-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1.2rem;
+    }
+
+    .match-name {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin: 0;
+        line-height: 1.3;
+    }
+
+    .match-id {
+        background: #f8f9fa;
+        color: var(--text-light);
+        padding: 0.3rem 0.8rem;
+        border-radius: 15px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .match-details {
+        margin-bottom: 1.5rem;
+    }
+
+    .match-detail {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 0.8rem;
+        color: var(--text-color);
+    }
+
+    .match-detail i {
+        color: var(--warning-color);
+        width: 18px;
+        text-align: center;
+        font-size: 0.9rem;
+    }
+
+    .detail-value {
+        flex: 1;
+        font-weight: 500;
+    }
+
+    /* Similarity Score */
+    .similarity-section {
+        background: linear-gradient(135deg, rgba(243, 156, 18, 0.1), rgba(243, 156, 18, 0.05));
+        border-radius: var(--border-radius);
+        padding: 1.2rem;
+        margin: 1.5rem 0;
+        border: 2px solid rgba(243, 156, 18, 0.2);
+    }
+
+    .similarity-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.8rem;
+    }
+
+    .similarity-label {
+        font-weight: 600;
+        color: var(--primary-color);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .similarity-score {
+        font-size: 1.8rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, var(--warning-color), #f1c40f);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .similarity-bar {
+        height: 8px;
+        background: #e1e5eb;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 0.8rem;
+    }
+
+    .similarity-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--warning-color), #f1c40f);
+        border-radius: 4px;
+        transition: width 1s ease-out;
+        width: 0%;
+        /* Will be set by JS */
+    }
+
+    .similarity-labels {
+        display: flex;
+        justify-content: space-between;
+        color: var(--text-light);
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .match-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .match-btn {
+        flex: 1;
+        padding: 0.8rem 1.2rem;
+        border-radius: var(--border-radius);
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-size: 0.95rem;
+        border: none;
+    }
+
+    .view-btn {
+        background: var(--secondary-color);
+        color: white;
+        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+    }
+
+    .view-btn:hover {
+        background: #2980b9;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(52, 152, 219, 0.4);
+    }
+
+    .contact-btn {
+        background: linear-gradient(135deg, var(--success-color), #2ecc71);
+        color: white;
+        text-decoration: none;
+        box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+        width: 100%;
+    }
+
+    .contact-btn:hover {
+        background: linear-gradient(135deg, #2ecc71, var(--success-color));
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+        color: white;
+    }
+
+    /* Confidence Badge Overlay */
+    .confidence-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        z-index: 2;
+        backdrop-filter: blur(8px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .badge-high {
+        background: rgba(39, 174, 96, 0.9);
+        color: white;
+    }
+
+    .badge-medium {
+        background: rgba(243, 156, 18, 0.9);
+        color: white;
+    }
+
+    .badge-low {
+        background: rgba(231, 76, 60, 0.9);
+        color: white;
+    }
+
+    /* Confidence Levels */
+    .confidence-tags {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .confidence-tag {
+        padding: 0.4rem 0.8rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .confidence-high {
+        background: rgba(39, 174, 96, 0.1);
+        color: var(--success-color);
+        border: 1px solid rgba(39, 174, 96, 0.3);
+    }
+
+    .confidence-medium {
+        background: rgba(243, 156, 18, 0.1);
+        color: var(--warning-color);
+        border: 1px solid rgba(243, 156, 18, 0.3);
+    }
+
+    .confidence-low {
+        background: rgba(231, 76, 60, 0.1);
+        color: var(--accent-color);
+        border: 1px solid rgba(231, 76, 60, 0.3);
+    }
+
+    /* Empty State */
+    .empty-state {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        border: 2px dashed #e1e5eb;
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        color: #e1e5eb;
+        margin-bottom: 1.5rem;
+    }
+
+    .empty-state h3 {
+        font-size: 1.8rem;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+        color: var(--text-light);
+        max-width: 500px;
+        margin: 0 auto 2rem;
+        line-height: 1.6;
+        font-size: 1.1rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .action-btn {
+        padding: 0.9rem 2rem;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border: none;
+        text-decoration: none;
+    }
+
+    .primary-btn {
+        background: linear-gradient(135deg, var(--secondary-color), #2980b9);
+        color: white;
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+    }
+
+    .primary-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+    }
+
+    .outline-btn {
+        background: transparent;
+        color: var(--text-color);
+        border: 2px solid #e1e5eb;
+    }
+
+    .outline-btn:hover {
+        background: #f8f9fa;
+        border-color: var(--text-light);
+    }
+
+    /* Loading Animation */
+    .loading-animation {
+        display: none;
+        text-align: center;
+        padding: 4rem;
+        grid-column: 1 / -1;
+    }
+
+    .spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid #f0f2f5;
+        border-top: 4px solid var(--warning-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1.5rem;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+        .match-grid {
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        }
+    }
+
+    @media (max-width: 992px) {
+        .match-results-container {
+            padding: 1.5rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.2rem;
+        }
+
+        .info-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .match-grid {
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .match-image {
+            height: 220px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .match-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .match-actions {
+            flex-direction: column;
+        }
+
+        .match-btn {
+            width: 100%;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .action-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .match-results-container {
+            padding: 1rem;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+        }
+
+        .results-info {
+            padding: 1.2rem;
+        }
+
+        .match-content {
+            padding: 1.2rem;
+        }
+
+        .match-header {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .match-id {
+            align-self: flex-start;
+        }
+
+        .similarity-header {
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: flex-start;
+        }
+
+        .similarity-score {
+            font-size: 1.6rem;
+        }
+    }
+</style>
+
+<div class="match-results-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>Match Results</h1>
+        <div class="mode-indicator">
+            <i class="fas fa-people-arrows"></i>
+            <span>
+                {% if mode == "missing_to_found" %}
+                Searching Found Persons Database
+                {% else %}
+                Searching Missing Persons Database
+                {% endif %}
+            </span>
+        </div>
+        <p class="result-subtitle">
+            {% if matches and matches.0.2.level != "HIGH" %}
+                Possible Matches
+            {% else %}
+                Best Matches
+            {% endif %}
+        </p>
+    </div>
+
+    <!-- Results Information -->
+    <div class="results-info">
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-value" id="totalMatches" data-value="{{ matches|length }}">0</div>
+                <div class="info-label">Total Matches Found</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-value" id="topScore"
+                    data-value="{% if matches %}{% widthratio matches.0.0 1 100 %}%{% else %}0%{% endif %}">0%</div>
+                <div class="info-label">Highest Similarity</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-value" id="avgScore" data-value="0%">0%</div>
+                <div class="info-label">Average Similarity</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-value" id="strongMatches" data-value="0">0</div>
+                <div class="info-label">Strong Matches</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Match Results Grid -->
+    {% if matches %}
+    <div class="match-grid" id="matchGrid">
+        {% for score, person, confidence in matches %}
+        <div class="match-card" data-score="{% widthratio score 1 100 %}">
+            <div class="match-rank">{{ forloop.counter }}</div>
+
+            {% if confidence.level == "HIGH" %}
+            <div class="confidence-badge badge-high animated pulse">
+                <i class="fas fa-shield-check"></i>
+                {{ confidence.level|title }} Match
+            </div>
+            {% elif confidence.level == "MEDIUM" %}
+            <div class="confidence-badge badge-medium">
+                <i class="fas fa-shield-alt"></i>
+                {{ confidence.level|title }} Match
+            </div>
+            {% else %}
+            <div class="confidence-badge badge-low">
+                <i class="fas fa-info-circle"></i>
+                {{ confidence.level|title }} Match
+            </div>
+            {% endif %}
+
+            <div class="match-image">
+                {% if person.photo %}
+                <img src="{{ person.photo.url }}" alt="{{ person.name }}">
+                {% else %}
+                <div class="no-photo">
+                    <i class="fas fa-user"></i>
+                </div>
+                {% endif %}
+                <div class="image-overlay"></div>
+            </div>
+
+            <div class="match-content">
+                <div class="match-header">
+                    <h3 class="match-name">{{ person.name|default:"Unknown" }}</h3>
+                    <div class="match-id">ID: {{ forloop.counter|stringformat:"04d" }}</div>
+                </div>
+
+                <div class="match-details">
+                    <div class="match-detail">
+                        <i
+                            class="fas fa-{% if mode == 'missing_to_found' %}map-marker-alt{% else %}search-location{% endif %}"></i>
+                        <span class="detail-value">
+                            {% if mode == "missing_to_found" %}
+                            Found: {{ person.found_location|default:"Location unknown" }}
+                            {% else %}
+                            Last seen: {{ person.last_seen_location|default:"Location unknown" }}
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <div class="match-detail">
+                        <i class="fas fa-user-clock"></i>
+                        <span class="detail-value">
+                            {% if mode == "missing_to_found" %}
+                            Age Est: {{ person.age_estimate|default:"Age unknown" }}
+                            {% else %}
+                            Age: {{ person.age|default:"Unknown" }}
+                            {% endif %} | {{ person.get_gender_display|default:"Unknown" }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Similarity Score -->
+                <div class="similarity-section">
+                    <div class="similarity-header">
+                        <div class="similarity-label">
+                            <i class="fas fa-fingerprint"></i>
+                            <span>Match Integrity</span>
+                        </div>
+                        <div class="similarity-score" id="score-{{ forloop.counter }}">
+                            {% widthratio score 1 100 %}%
+                        </div>
+                    </div>
+
+                    <div class="similarity-bar">
+                        <div class="similarity-fill" id="fill-{{ forloop.counter }}"></div>
+                    </div>
+
+                    <div class="similarity-labels">
+                        <span>Low Cache</span>
+                        <span>Potential</span>
+                        <span>High Match</span>
+                    </div>
+                </div>
+
+                <div class="match-actions">
+                    <a href="{% url 'open_chat' person.user.id %}?source_id={{ source.id }}&match_id={{ person.id }}&mode={{ mode }}"
+                        class="match-btn contact-btn">
+                        <i class="fas fa-paper-plane"></i>
+                        Initiate Contact with Reporter
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">
+            <i class="fas fa-search-minus"></i>
+        </div>
+        <h3>No Strong Matches Found</h3>
+        <p>
+            Our system couldn't find any strong matches based on the provided information.
+            This could be due to limited data or the person not being in our database yet.
+        </p>
+
+        <!-- <div class="action-buttons">
+            <button class="action-btn primary-btn" onclick="refineSearch()">
+                <i class="fas fa-sliders-h"></i>
+                Refine Search Criteria
+            </button>
+            <button class="action-btn outline-btn" onclick="viewAllPersons()">
+                <i class="fas fa-list"></i>
+                Browse All Persons
+            </button>
+        </div> -->
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Compute average and strong match stats from card data
+        const allCards = document.querySelectorAll('.match-card');
+        const avgEl = document.getElementById('avgScore');
+        const strongEl = document.getElementById('strongMatches');
+
+        if (allCards.length > 0) {
+            let totalScore = 0;
+            let strongCount = 0;
+            allCards.forEach(card => {
+                const score = parseFloat(card.dataset.score || '0');
+                totalScore += score;
+                if (score >= 75) strongCount++;
+            });
+            const avgVal = (totalScore / allCards.length).toFixed(1);
+            if (avgEl) avgEl.setAttribute('data-value', avgVal + '%');
+            if (strongEl) strongEl.setAttribute('data-value', strongCount);
+        } else {
+            if (avgEl) avgEl.setAttribute('data-value', '0%');
+            if (strongEl) strongEl.setAttribute('data-value', '0');
+        }
+
+        // Animate info cards
+        const infoItems = document.querySelectorAll('.info-item');
+        infoItems.forEach((item, index) => {
+            const valueElement = item.querySelector('.info-value');
+            if (valueElement) {
+                const text = valueElement.getAttribute('data-value') || valueElement.textContent;
+                const numberMatch = text.match(/(\d+(\.\d+)?)/);
+
+                if (numberMatch) {
+                    const target = parseFloat(numberMatch[1]);
+                    const isPercentage = text.includes('%');
+
+                    let current = 0;
+                    const steps = 60;
+                    const increment = target / steps;
+                    const duration = 1500; // 1.5 seconds
+
+                    const updateCounter = () => {
+                        if (current < target) {
+                            current += increment;
+                            valueElement.textContent = isPercentage ?
+                                `${Math.min(current, target).toFixed(1)}%` :
+                                Math.floor(Math.min(current, target));
+                            requestAnimationFrame(updateCounter);
+                        } else {
+                            valueElement.textContent = text;
+                        }
+                    };
+
+                    // Initial delay before starting the count
+                    setTimeout(() => {
+                        requestAnimationFrame(updateCounter);
+                    }, index * 150 + 500);
+                }
+            }
+        });
+
+        // Add hover effects to match cards
+        const matchCards = document.querySelectorAll('.match-card');
+
+        // Animate similarity bars
+        matchCards.forEach((card, index) => {
+            const score = parseFloat(card.dataset.score || '0');
+            const fillElement = card.querySelector('.similarity-fill');
+            if (fillElement) {
+                // Initial state
+                fillElement.style.width = '0%';
+
+                // Animate to target
+                setTimeout(() => {
+                    fillElement.style.width = `${Math.min(score, 100)}%`;
+                    fillElement.style.transition = 'width 1.5s cubic-bezier(0.4, 0, 0.2, 1)';
+                }, index * 100 + 800);
+            }
+        });
+
+        matchCards.forEach(card => {
+            card.addEventListener('mouseenter', function () {
+                const rank = this.querySelector('.match-rank');
+                if (rank) {
+                    rank.style.transform = 'scale(1.1)';
+                }
+
+                const confidenceTags = this.querySelectorAll('.confidence-tag');
+                confidenceTags.forEach(tag => {
+                    tag.style.transform = 'translateY(-2px)';
+                });
+            });
+
+            card.addEventListener('mouseleave', function () {
+                const rank = this.querySelector('.match-rank');
+                if (rank) {
+                    rank.style.transform = 'scale(1)';
+                }
+
+                const confidenceTags = this.querySelectorAll('.confidence-tag');
+                confidenceTags.forEach(tag => {
+                    tag.style.transform = 'translateY(0)';
+                });
+            });
+
+            // Add click to expand description
+            const description = card.querySelector('.similarity-section');
+            if (description) {
+                description.addEventListener('click', function (e) {
+                    if (!e.target.closest('.match-btn')) {
+                        const details = card.querySelector('.match-details');
+                        if (details) {
+                            details.classList.toggle('expanded');
+                        }
+                    }
+                });
+            }
+        });
+
+        // Add score-based sorting buttons
+        const resultsInfo = document.querySelector('.results-info');
+        if (resultsInfo && matchCards.length > 0) {
+            const sortButtons = document.createElement('div');
+            sortButtons.className = 'sort-buttons';
+            sortButtons.style.display = 'flex';
+            sortButtons.style.gap = '1rem';
+            sortButtons.style.marginTop = '1rem';
+            sortButtons.style.flexWrap = 'wrap';
+
+            sortButtons.innerHTML = `
+                <button class="sort-btn" data-sort="score-desc">
+                    <i class="fas fa-sort-amount-down-alt"></i>
+                    Sort by Score (High to Low)
+                </button>
+                <button class="sort-btn" data-sort="score-asc">
+                    <i class="fas fa-sort-amount-up-alt"></i>
+                    Sort by Score (Low to High)
+                </button>
+            `;
+
+            resultsInfo.appendChild(sortButtons);
+
+            // Add sort functionality
+            document.querySelectorAll('.sort-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const sortType = this.dataset.sort;
+
+                    // Update active button
+                    document.querySelectorAll('.sort-btn').forEach(b => {
+                        b.style.background = '';
+                        b.style.color = '';
+                    });
+                    this.style.background = 'var(--warning-color)';
+                    this.style.color = 'white';
+
+                    // Sort cards
+                    sortMatchCards(sortType);
+                });
+            });
+        }
+
+        function sortMatchCards(sortType) {
+            const grid = document.getElementById('matchGrid');
+            const cards = Array.from(document.querySelectorAll('.match-card'));
+
+            cards.sort((a, b) => {
+                const scoreA = parseFloat(a.dataset.score || '0');
+                const scoreB = parseFloat(b.dataset.score || '0');
+
+                if (sortType === 'score-desc') {
+                    return scoreB - scoreA;
+                } else {
+                    return scoreA - scoreB;
+                }
+            });
+
+            // Reorder cards in grid
+            cards.forEach((card, index) => {
+                grid.appendChild(card);
+
+                // Update rank number
+                const rankElement = card.querySelector('.match-rank');
+                if (rankElement) {
+                    rankElement.textContent = index + 1;
+                }
+
+                // Animate new position
+                card.style.animation = 'none';
+                card.offsetHeight; // Trigger reflow
+                card.style.animation = `cardAppear 0.5s ease-out ${index * 0.1}s both`;
+            });
+        }
+    });
+
+    // Global functions for buttons
+    function viewPersonDetails(personId, mode) {
+        // In a real application, this would navigate to a details page
+        alert(`Viewing details for person ID: ${personId}\nMode: ${mode}\n\nThis would navigate to a detailed view page.`);
+    }
+
+    function reportMatch(personId, score) {
+        // In a real application, this would open a contact/report form
+        alert(`Reporting match for person ID: ${personId}\nSimilarity Score: ${score}%\n\nThis would open a form to contact the reporter.`);
+    }
+
+    function refineSearch() {
+        // In a real application, this would go back to search/filters
+        alert('This would take you back to refine your search criteria.');
+    }
+
+    function viewAllPersons() {
+        // In a real application, this would navigate to the all persons page
+        alert('This would navigate to browse all missing/found persons.');
+    }
+</script>
+
+<style>
+    /* Additional animations */
+    .match-rank {
+        transition: var(--transition);
+    }
+
+    .confidence-tag {
+        transition: var(--transition);
+    }
+
+    /* Expanded details view */
+    .match-details.expanded .match-detail {
+        animation: fadeInUp 0.3s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Sort buttons */
+    .sort-btn {
+        padding: 0.6rem 1.2rem;
+        background: #f8f9fa;
+        border: 2px solid #e1e5eb;
+        border-radius: var(--border-radius);
+        color: var(--text-color);
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9rem;
+    }
+
+    .sort-btn:hover {
+        border-color: var(--warning-color);
+        color: var(--warning-color);
+    }
+
+    /* Responsive improvements */
+    @media (max-width: 480px) {
+        .similarity-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .similarity-labels {
+            font-size: 0.8rem;
+        }
+
+        .confidence-tags {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .confidence-tag {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}

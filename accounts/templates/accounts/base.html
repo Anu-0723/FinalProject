@@ -1,0 +1,421 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}LocateNow{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+        content="LocateNow – AI-powered missing person detection platform using facial recognition to help reunite families.">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1e293b;
+            --accent: #2563eb;
+            --danger: #dc2626;
+            --success: #16a34a;
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --muted: #64748b;
+            --radius: 10px;
+            --shadow: 0 8px 24px rgba(0, 0, 0, .08);
+        }
+
+        body {
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: var(--primary);
+        }
+
+        /* NAVBAR */
+        .navbar {
+            background: #ffffff;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-container {
+            max-width: 1400px;
+            margin: auto;
+            padding: 0 1.5rem;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: 800;
+            text-decoration: none;
+            color: var(--primary);
+        }
+
+        .navbar-brand i {
+            color: var(--accent);
+            font-size: 1.7rem;
+        }
+
+        .navbar-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            list-style: none;
+        }
+
+        .navbar-link {
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: 600;
+            padding: .5rem .9rem;
+            border-radius: var(--radius);
+        }
+
+        .navbar-link:hover {
+            background: rgba(37, 99, 235, .08);
+            color: var(--accent);
+        }
+
+        .btn {
+            padding: .55rem 1.2rem;
+            border-radius: var(--radius);
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+
+        .btn.primary {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .btn.outline {
+            border: 2px solid var(--accent);
+            color: var(--accent);
+            background: transparent;
+        }
+
+        /* PROFILE DROPDOWN */
+        .profile-dropdown {
+            position: relative;
+        }
+
+        .profile-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+
+        .nav-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .profile-menu {
+            position: absolute;
+            right: 0;
+            top: 120%;
+            background: #fff;
+            width: 260px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            display: none;
+            overflow: hidden;
+        }
+
+        .profile-menu-header {
+            padding: 1rem;
+            background: var(--bg);
+            font-size: .9rem;
+        }
+
+        .profile-menu a {
+            display: block;
+            padding: .8rem 1rem;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .profile-menu a:hover {
+            background: rgba(37, 99, 235, .08);
+        }
+
+        /* MAIN */
+        main.container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            flex: 1;
+            width: 100%;
+        }
+
+        /* FOOTER */
+        footer {
+            background: var(--primary);
+            color: #fff;
+            text-align: center;
+            padding: 1.5rem;
+            font-size: .9rem;
+        }
+
+        /* HAMBURGER */
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--primary);
+            cursor: pointer;
+            padding: 0.4rem;
+        }
+
+        /* MOBILE */
+        @media (max-width: 900px) {
+            .hamburger {
+                display: block;
+            }
+
+            .navbar-menu {
+                display: none;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                right: 0;
+                background: #fff;
+                flex-direction: column;
+                padding: 1rem;
+                box-shadow: 0 8px 20px rgba(0, 0, 0, .1);
+                gap: 0.5rem;
+            }
+
+            .navbar-menu.open {
+                display: flex;
+            }
+
+            .navbar-container {
+                position: relative;
+            }
+
+            .profile-dropdown {
+                width: 100%;
+            }
+
+            .profile-menu {
+                position: static;
+                width: 100%;
+                box-shadow: none;
+                border: 1px solid var(--bg);
+            }
+        }
+
+        .message-banner {
+            margin: 1rem auto 0;
+            max-width: 1400px;
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border: 1px solid transparent;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .message-banner.success {
+            background: rgba(22, 163, 74, 0.12);
+            color: #166534;
+            border-color: rgba(22, 163, 74, 0.2);
+        }
+
+        .message-banner.error {
+            background: rgba(220, 38, 38, 0.12);
+            color: #991b1b;
+            border-color: rgba(220, 38, 38, 0.2);
+        }
+
+        .message-banner.warning {
+            background: rgba(234, 179, 8, 0.12);
+            color: #92400e;
+            border-color: rgba(234, 179, 8, 0.2);
+        }
+
+        .message-banner i {
+            font-size: 1.2rem;
+        }
+        .message-banner strong {
+            font-weight: 700;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">
+                <i class="fas fa-people-arrows"></i>
+                LocateNow
+            </a>
+
+            <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <ul class="navbar-menu" id="navMenu">
+                {% if show_app_nav %}
+                <li>
+                    <a href="{% url 'dashboard' %}" class="navbar-link">Dashboard</a>
+                </li>
+
+                <!-- Messaging Button -->
+                <li>
+                    <a href="{% url 'inbox' %}" class="navbar-link" title="Messages">
+                        <i class="fas fa-comments"></i>
+                    </a>
+                </li>
+
+                <li class="profile-dropdown">
+                    <button class="profile-toggle" id="profileToggle">
+                        <span class="nav-avatar">
+                            {{ request.user.username|slice:":1"|upper }}
+                        </span>
+                        {{ request.user.username }}
+                        <i class="fas fa-caret-down"></i>
+                    </button>
+
+                    <div class="profile-menu" id="profileMenu">
+                        <div class="profile-menu-header">
+                            {{ request.user.email|default:"-" }}
+                        </div>
+                        <a href="{% url 'update_profile' %}">
+                            <i class="fas fa-user-edit"></i> Update Profile
+                        </a>
+                        <a href="{% url 'view_report' %}">
+                            <i class="fas fa-clipboard-list"></i> My Reports
+                        </a>
+                        <form method="post" action="{% url 'logout' %}" style="margin:0;">
+                            {% csrf_token %}
+                            <button type="submit"
+                                style="width:100%; text-align:left; background:none; border:none; padding:.8rem 1rem; color:var(--primary); cursor:pointer; font:inherit;">Logout</button>
+                        </form>
+                    </div>
+                </li>
+
+                {% else %}
+                <li>
+                    <a href="{% url 'login' %}" class="btn outline">Login</a>
+                </li>
+                <li>
+                    <a href="{% url 'register' %}" class="btn primary">Register</a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </header>
+
+    {% if messages %}
+    <div class="message-banner {% for message in messages %}{{ message.tags }} {% endfor %}">
+        <i class="fas fa-check-circle"></i>
+        <div>
+            {% for message in messages %}
+            <strong>{% if 'success' in message.tags %}Success{% elif 'error' in message.tags %}Error{% elif 'warning' in message.tags %}Warning{% else %}Notice{% endif %}:</strong>
+            {{ message }}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        Helping families reunite • © LocateNow 2026
+    </footer>
+
+    <script>
+        // Profile dropdown toggle
+        const toggle = document.getElementById('profileToggle');
+        const menu = document.getElementById('profileMenu');
+
+        if (toggle && menu) {
+            toggle.addEventListener('click', e => {
+                e.stopPropagation();
+                menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+            });
+
+            document.addEventListener('click', () => {
+                menu.style.display = 'none';
+            });
+        }
+
+        // Hamburger mobile menu toggle
+        const hamburger = document.getElementById('hamburgerBtn');
+        const navMenu = document.getElementById('navMenu');
+
+        if (hamburger && navMenu) {
+            hamburger.addEventListener('click', e => {
+                e.stopPropagation();
+                navMenu.classList.toggle('open');
+                const icon = hamburger.querySelector('i');
+                icon.className = navMenu.classList.contains('open') ? 'fas fa-times' : 'fas fa-bars';
+            });
+
+            document.addEventListener('click', () => {
+                navMenu.classList.remove('open');
+                const icon = hamburger.querySelector('i');
+                if (icon) icon.className = 'fas fa-bars';
+            });
+
+            navMenu.addEventListener('click', e => e.stopPropagation());
+        }
+
+        // Handle Django Messages with SweetAlert2
+        {% if messages %}
+        {% for message in messages %}
+        Swal.fire({
+            icon: "{% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+            title: "{% if message.tags == 'error' %}Oops...{% elif message.tags == 'success' %}Success!{% else %}Notification{% endif %}",
+            text: "{{ message }}",
+            confirmButtonColor: "{% if message.tags == 'success' %}var(--success){% else %}var(--accent, #2563eb){% endif %}",
+        });
+        {% endfor %}
+        {% endif %}
+    </script>
+    <script src="http://127.0.0.1:5001/static/widget.js" data-server="http://127.0.0.1:5001" data-bot-id="8"
+        data-bot-name="Support Assistant" data-color="#6c63ff" data-welcome="Hi! How I can help you?"> </script>
+</body>
+
+</html>

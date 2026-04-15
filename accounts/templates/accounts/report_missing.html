@@ -1,0 +1,1260 @@
+{% extends "accounts/base.html" %}
+{% block title %}Report Missing Person - LocateNow{% endblock %}
+
+{% block content %}
+<style>
+    /* Report Form Styles */
+    :root {
+        --primary-color: #2c3e50;
+        --secondary-color: #3498db;
+        --accent-color: #e74c3c;
+        --success-color: #27ae60;
+        --warning-color: #f39c12;
+        --light-color: #f8f9fa;
+        --dark-color: #2c3e50;
+        --text-color: #34495e;
+        --text-light: #7f8c8d;
+        --shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        --shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.12);
+        --transition: all 0.3s ease;
+        --border-radius: 12px;
+    }
+
+    .report-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    /* Form Header */
+    .form-header {
+        margin-bottom: 3rem;
+        text-align: center;
+    }
+
+    .form-header h1 {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+        font-weight: 700;
+        position: relative;
+        display: inline-block;
+    }
+
+    .form-header h1::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 4px;
+        background: linear-gradient(90deg, var(--secondary-color), var(--success-color));
+        border-radius: 2px;
+    }
+
+    .form-header p {
+        color: var(--text-light);
+        font-size: 1.1rem;
+        line-height: 1.6;
+        max-width: 700px;
+        margin: 2rem auto 0;
+    }
+
+    .form-alert {
+        background: rgba(231, 76, 60, 0.1);
+        color: var(--accent-color);
+        padding: 1.2rem;
+        border-radius: var(--border-radius);
+        margin: 2rem auto;
+        max-width: 800px;
+        border-left: 4px solid var(--accent-color);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        animation: slideInDown 0.4s ease-out;
+    }
+
+    @keyframes slideInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .form-alert i {
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    /* Form Layout */
+    .report-form {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        padding: 3rem;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .report-form::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 6px;
+        background: linear-gradient(90deg, var(--secondary-color), #2980b9);
+    }
+
+    .form-sections {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3rem;
+    }
+
+    .form-section {
+        animation: fadeInUp 0.6s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .form-section:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    .form-section:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #f0f2f5;
+    }
+
+    .section-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, var(--secondary-color), #2980b9);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.3rem;
+        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+    }
+
+    .section-header h3 {
+        font-size: 1.5rem;
+        color: var(--primary-color);
+        margin: 0;
+        font-weight: 600;
+    }
+
+    /* Form Groups */
+    .form-group {
+        margin-bottom: 1.8rem;
+        position: relative;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.6rem;
+        color: var(--primary-color);
+        font-weight: 600;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .form-group label i {
+        color: var(--secondary-color);
+        font-size: 0.9rem;
+    }
+
+    .required::after {
+        content: '*';
+        color: var(--accent-color);
+        margin-left: 4px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.9rem 1.2rem;
+        font-size: 1rem;
+        border: 2px solid #e1e5eb;
+        border-radius: var(--border-radius);
+        transition: var(--transition);
+        background-color: #fff;
+        color: var(--text-color);
+        font-family: inherit;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+        transform: translateY(-1px);
+    }
+
+    .form-control::placeholder {
+        color: #a0aec0;
+    }
+
+    select.form-control {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%237f8c8d' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 16px;
+        padding-right: 3rem;
+    }
+
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+        line-height: 1.6;
+    }
+
+    /* Traditional Side-by-Side Photo Upload */
+    .photo-upload-layout {
+        display: grid;
+        grid-template-columns: 1fr 200px;
+        gap: 2rem;
+        align-items: start;
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        border: 2px dashed #e1e5eb;
+    }
+
+    .upload-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .upload-btn-normal {
+        background: linear-gradient(135deg, var(--secondary-color), #2980b9);
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: var(--border-radius);
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        cursor: pointer;
+        transition: var(--transition);
+        border: none;
+    }
+
+    .upload-btn-normal:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+    }
+
+    .upload-info-text {
+        color: var(--text-light);
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+
+    .preview-container-normal {
+        width: 200px;
+        height: 200px;
+        border-radius: var(--border-radius);
+        background: white;
+        border: 1px solid #e1e5eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .preview-container-normal img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: none;
+    }
+
+    .preview-container-normal img.visible {
+        display: block;
+    }
+
+    .preview-placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        color: #ccd1d9;
+    }
+
+    .preview-placeholder i {
+        font-size: 3rem;
+    }
+
+    .preview-placeholder span {
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .remove-preview-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 30px;
+        height: 30px;
+        background: rgba(231, 76, 60, 0.9);
+        color: white;
+        border-radius: 50%;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: var(--transition);
+        z-index: 10;
+        border: none;
+    }
+
+    .remove-preview-btn.visible {
+        display: flex;
+    }
+
+    .remove-preview-btn:hover {
+        background: #e74c3c;
+        transform: scale(1.1);
+    }
+
+    @media (max-width: 600px) {
+        .photo-upload-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .preview-container-normal {
+            width: 100%;
+            height: 250px;
+        }
+    }
+
+    .file-input {
+        display: none;
+    }
+
+    .file-preview {
+        margin-top: 1.5rem;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .file-preview.active {
+        display: flex;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .preview-item {
+        position: relative;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+        width: 150px;
+        height: 150px;
+    }
+
+    .preview-item:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-hover);
+    }
+
+    .preview-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .remove-file {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: rgba(231, 76, 60, 0.9);
+        color: white;
+        border: none;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        transition: var(--transition);
+    }
+
+    .remove-file:hover {
+        background: var(--accent-color);
+        transform: scale(1.1);
+    }
+
+    /* Form Actions */
+    .form-actions {
+        grid-column: 1 / -1;
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 2px solid #f0f2f5;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+
+    .form-note {
+        color: var(--text-light);
+        font-size: 0.9rem;
+        flex: 1;
+    }
+
+    .form-note i {
+        color: var(--accent-color);
+        margin-right: 5px;
+    }
+
+    .button-group {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        padding: 0.9rem 2rem;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: var(--border-radius);
+        border: none;
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        min-width: 140px;
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, var(--secondary-color), #2980b9);
+        color: white;
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+    }
+
+    .btn-cancel {
+        background: transparent;
+        color: var(--text-light);
+        border: 2px solid #e1e5eb;
+    }
+
+    .btn-cancel:hover {
+        background: #f8f9fa;
+        border-color: var(--text-light);
+        color: var(--text-color);
+    }
+
+    /* Error Styling */
+    .error-message {
+        color: var(--accent-color);
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        animation: shake 0.5s ease;
+    }
+
+    @keyframes shake {
+
+        0%,
+        100% {
+            transform: translateX(0);
+        }
+
+        10%,
+        30%,
+        50%,
+        70%,
+        90% {
+            transform: translateX(-5px);
+        }
+
+        20%,
+        40%,
+        60%,
+        80% {
+            transform: translateX(5px);
+        }
+    }
+
+    .form-control.error {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+    }
+
+    /* Success Message */
+    .success-message {
+        background: rgba(39, 174, 96, 0.1);
+        color: var(--success-color);
+        padding: 1.2rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 2rem;
+        border-left: 4px solid var(--success-color);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        animation: slideInDown 0.4s ease-out;
+    }
+
+    /* Progress Indicator */
+    .form-progress {
+        margin-bottom: 3rem;
+        display: none;
+    }
+
+    .progress-bar {
+        height: 6px;
+        background: #f0f2f5;
+        border-radius: 3px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .progress-fill {
+        position: absolute;
+        height: 100%;
+        background: linear-gradient(90deg, var(--secondary-color), var(--success-color));
+        border-radius: 3px;
+        transition: width 0.3s ease;
+        width: 0%;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 992px) {
+        .form-sections {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        .report-form {
+            padding: 2rem;
+        }
+
+        .form-header h1 {
+            font-size: 2.2rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .report-container {
+            padding: 1.5rem;
+        }
+
+        .form-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .button-group {
+            width: 100%;
+            justify-content: stretch;
+        }
+
+        .btn {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .form-header h1 {
+            font-size: 2rem;
+        }
+
+        .file-preview {
+            justify-content: center;
+        }
+
+        .preview-item {
+            width: 120px;
+            height: 120px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .report-form {
+            padding: 1.5rem;
+        }
+
+        .form-header h1 {
+            font-size: 1.8rem;
+        }
+
+        .section-header {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .preview-item {
+            width: 100px;
+            height: 100px;
+        }
+
+        .upload-icon {
+            font-size: 2.5rem;
+        }
+    }
+
+    /* Loading Overlay */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.95);
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        backdrop-filter: blur(8px);
+    }
+
+    .loading-overlay.active {
+        display: flex;
+        animation: fadeIn 0.4s ease-out;
+    }
+
+    .loader-content {
+        text-align: center;
+    }
+
+    .loader-pulse {
+        width: 100px;
+        height: 100px;
+        background: var(--secondary-color);
+        border-radius: 50%;
+        margin: 0 auto 2rem;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2.5rem;
+        box-shadow: 0 0 30px rgba(52, 152, 219, 0.4);
+    }
+
+    .loader-pulse::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        border: 4px solid var(--secondary-color);
+        animation: pulseScale 1.5s infinite;
+    }
+
+    @keyframes pulseScale {
+        0% {
+            transform: scale(1);
+            opacity: 0.8;
+        }
+
+        100% {
+            transform: scale(1.8);
+            opacity: 0;
+        }
+    }
+
+    .loader-text h2 {
+        color: var(--primary-color);
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .loader-text p {
+        color: var(--text-light);
+        font-size: 1.1rem;
+    }
+</style>
+
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loader-content">
+        <div class="loader-pulse">
+            <i class="fas fa-search-plus"></i>
+        </div>
+        <div class="loader-text">
+            <h2>Processing Report</h2>
+            <p>Analyzing photo and searching registry for matches... Please wait.</p>
+        </div>
+    </div>
+</div>
+
+<div class="report-container">
+    <!-- Form Header -->
+    <div class="form-header">
+        <h1>Report Missing Person</h1>
+        <p>
+            Please provide as much information as possible about the missing person.
+            The more details you provide, the better our system can help find them.
+        </p>
+    </div>
+
+    <!-- Dynamic Alerts handled by base.html SweetAlert2 -->
+
+
+    <!-- Progress Indicator -->
+    <div class="form-progress" id="formProgress">
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+    </div>
+
+    <!-- Report Form -->
+    <form method="post" enctype="multipart/form-data" class="report-form" id="reportForm">
+        {% csrf_token %}
+
+        <div class="form-sections">
+            <!-- Personal Information Section -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <h3>Personal Information</h3>
+                </div>
+
+                <!-- Name -->
+                <div class="form-group">
+                    <label for="{{ form.name.id_for_label }}" class="required">
+                        <i class="fas fa-signature"></i>
+                        Full Name
+                    </label>
+                    <input type="text" id="{{ form.name.id_for_label }}" name="{{ form.name.name }}"
+                        class="form-control" placeholder="Enter full name of missing person"
+                        value="{{ form.name.value|default:'' }}" required>
+                    {% if form.name.errors %}
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {{ form.name.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Age -->
+                <div class="form-group">
+                    <label for="{{ form.age.id_for_label }}" class="required">
+                        <i class="fas fa-birthday-cake"></i>
+                        Age
+                    </label>
+                    <input type="number" id="{{ form.age.id_for_label }}" name="{{ form.age.name }}"
+                        class="form-control" placeholder="Enter age" value="{{ form.age.value|default:'' }}" min="0"
+                        max="120" required>
+                    {% if form.age.errors %}
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {{ form.age.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Gender -->
+                <div class="form-group">
+                    <label for="{{ form.gender.id_for_label }}" class="required">
+                        <i class="fas fa-venus-mars"></i>
+                        Gender
+                    </label>
+                    <select id="{{ form.gender.id_for_label }}" name="{{ form.gender.name }}" class="form-control"
+                        required>
+                        <option value="" disabled {% if not form.gender.value %}selected{% endif %}>Select gender
+                        </option>
+                        <option value="M" {% if form.gender.value == 'M' %}selected{% endif %}>Male</option>
+                        <option value="F" {% if form.gender.value == 'F' %}selected{% endif %}>Female</option>
+                        <option value="O" {% if form.gender.value == 'O' %}selected{% endif %}>Other</option>
+                        <option value="U" {% if form.gender.value == 'U' %}selected{% endif %}>Prefer not to say</option>
+                    </select>
+                    {% if form.gender.errors %}
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {{ form.gender.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Incident Details Section -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <h3>Incident Details</h3>
+                </div>
+
+                <!-- Last Seen Location -->
+                <div class="form-group">
+                    <label for="{{ form.last_seen_location.id_for_label }}" class="required">
+                        <i class="fas fa-map-pin"></i>
+                        Last Seen Location
+                    </label>
+                    <input type="text" id="{{ form.last_seen_location.id_for_label }}"
+                        name="{{ form.last_seen_location.name }}" class="form-control"
+                        placeholder="Enter last known location" value="{{ form.last_seen_location.value|default:'' }}"
+                        required>
+                    {% if form.last_seen_location.errors %}
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {{ form.last_seen_location.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Description -->
+                <div class="form-group">
+                    <label for="{{ form.description.id_for_label }}" class="required">
+                        <i class="fas fa-info-circle"></i>
+                        Description & Details
+                    </label>
+                    <textarea id="{{ form.description.id_for_label }}" name="{{ form.description.name }}"
+                        class="form-control"
+                        placeholder="Provide detailed description including clothing, distinguishing features, circumstances of disappearance, etc."
+                        rows="5" required>{{ form.description.value|default:'' }}</textarea>
+                    {% if form.description.errors %}
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {{ form.description.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Photo Upload Section -->
+            <div class="form-section" style="grid-column: 1 / -1;">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <h3>Photo Upload</h3>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.photo.id_for_label }}" class="required">
+                        <i class="fas fa-camera"></i>
+                        Person Photo
+                    </label>
+                    <div class="photo-upload-layout" id="dropArea">
+                        <div class="upload-controls">
+                            <label for="{{ form.photo.id_for_label }}" class="upload-btn-normal">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                Choose Photo
+                            </label>
+                            <div class="upload-info-text">
+                                <p>Upload a clear, front-facing photo.</p>
+                                <p>Max size: 5MB (JPG, PNG)</p>
+                            </div>
+                        </div>
+
+                        <div class="preview-container-normal" id="previewContainer">
+                            <div class="preview-placeholder" id="previewPlaceholder">
+                                <i class="fas fa-user"></i>
+                                <span>No Photo</span>
+                            </div>
+                            <img src="" alt="Preview" id="previewImg">
+                            <button type="button" class="remove-preview-btn" id="removePhoto">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <input type="file" id="{{ form.photo.id_for_label }}" name="{{ form.photo.name }}"
+                            class="file-input" accept="image/*" required>
+                    </div>
+                    {% if form.photo.errors %}
+                    <div class="error-message user">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {{ form.photo.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <div class="form-note">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Fields marked with * are required
+                </div>
+                <div class="button-group">
+                    <button type="button" class="btn btn-cancel" onclick="window.history.back()">
+                        <i class="fas fa-times"></i>
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-submit">
+                        <i class="fas fa-paper-plane"></i>
+                        Submit Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('reportForm');
+        const dropArea = document.getElementById('dropArea');
+        const fileInput = document.getElementById('{{ form.photo.id_for_label }}');
+        const previewImg = document.getElementById('previewImg');
+        const previewPlaceholder = document.getElementById('previewPlaceholder');
+        const removePhoto = document.getElementById('removePhoto');
+        const formProgress = document.getElementById('formProgress');
+        const progressFill = document.getElementById('progressFill');
+
+        // Initialize form controls
+        const formControls = form.querySelectorAll('.form-control, .file-input');
+        formControls.forEach(control => {
+            // Add focus/blur effects
+            control.addEventListener('focus', function () {
+                this.parentElement.parentElement.classList.add('focused');
+            });
+
+            control.addEventListener('blur', function () {
+                this.parentElement.parentElement.classList.remove('focused');
+                validateField(this);
+            });
+
+            // Real-time validation for required fields
+            if (control.hasAttribute('required')) {
+                control.addEventListener('input', function () {
+                    validateField(this);
+                    updateFormProgress();
+                });
+            }
+
+            // Set initial values if they exist (from form errors)
+            if (control.value) {
+                validateField(control);
+                updateFormProgress();
+            }
+        });
+
+        // File Upload Functionality
+        if (dropArea && fileInput) {
+            // Drag and drop functionality
+            // (Label association handles the click naturally)
+
+            // Drag and drop
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropArea.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight() {
+                dropArea.classList.add('dragover');
+            }
+
+            function unhighlight() {
+                dropArea.classList.remove('dragover');
+            }
+
+            // Handle dropped files
+            dropArea.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                handleFiles(files);
+            }
+
+            // Handle file input change
+            fileInput.addEventListener('change', function () {
+                handleFiles(this.files);
+            });
+
+            // Check if there's already a file (from form errors)
+            if (fileInput.files.length > 0) {
+                handleFiles(fileInput.files);
+            }
+        }
+
+        if (removePhoto) {
+            removePhoto.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                fileInput.value = '';
+                previewImg.classList.remove('visible');
+                previewPlaceholder.style.display = 'flex';
+                removePhoto.classList.remove('visible');
+                updateFormProgress();
+            });
+        }
+
+        function handleFiles(files) {
+            if (!files.length) return;
+
+            const file = files[0];
+
+            // Validate file
+            if (file.size > 5 * 1024 * 1024) {
+                showError('File size should be less than 5MB');
+                fileInput.value = '';
+                return;
+            }
+
+            if (!file.type.match('image.*')) {
+                showError('Please upload only image files (JPG, PNG, JPEG)');
+                fileInput.value = '';
+                return;
+            }
+
+            // Create preview
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                previewImg.src = e.target.result;
+                previewImg.classList.add('visible');
+                previewPlaceholder.style.display = 'none';
+                removePhoto.classList.add('visible');
+                updateFormProgress();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Form validation
+        function validateField(field) {
+            const formGroup = field.closest('.form-group');
+            const errorDiv = formGroup ? formGroup.querySelector('.error-message.user') : null;
+
+            if (field.hasAttribute('required')) {
+                let isValid = true;
+                let errorMessage = '';
+
+                if (field.type === 'file') {
+                    isValid = field.files.length > 0;
+                    errorMessage = 'Please upload a photo';
+                } else {
+                    isValid = field.value.trim() !== '';
+                    errorMessage = 'This field is required';
+
+                    // Additional validation for specific fields
+                    if (field.type === 'number') {
+                        const value = parseInt(field.value);
+                        if (value < 0 || value > 120) {
+                            isValid = false;
+                            errorMessage = 'Please enter a valid age (0-120)';
+                        }
+                    }
+
+                    if (field.type === 'email') {
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (!emailRegex.test(field.value.trim())) {
+                            isValid = false;
+                            errorMessage = 'Please enter a valid email address';
+                        }
+                    }
+                }
+
+                if (!isValid) {
+                    field.classList.add('error');
+                    if (formGroup && !errorDiv) {
+                        const errorMsg = document.createElement('div');
+                        errorMsg.className = 'error-message user';
+                        errorMsg.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${errorMessage}`;
+                        formGroup.appendChild(errorMsg);
+                    }
+                    return false;
+                } else {
+                    field.classList.remove('error');
+                    if (errorDiv) {
+                        errorDiv.remove();
+                    }
+                    return true;
+                }
+            }
+            return true;
+        }
+
+        function updateFormProgress() {
+            if (!formProgress || !progressFill) return;
+
+            const requiredFields = form.querySelectorAll('[required]');
+            let filledCount = 0;
+
+            requiredFields.forEach(field => {
+                if (field.type === 'file') {
+                    if (field.files.length > 0) filledCount++;
+                } else {
+                    if (field.value.trim() !== '') filledCount++;
+                }
+            });
+
+            const progress = (filledCount / requiredFields.length) * 100;
+            progressFill.style.width = `${progress}%`;
+
+            // Show progress bar if progress > 0
+            if (progress > 0) {
+                formProgress.style.display = 'block';
+            } else {
+                formProgress.style.display = 'none';
+            }
+        }
+
+        // Form submission
+        if (form) {
+            form.addEventListener('submit', function (e) {
+                let isValid = true;
+                let firstErrorField = null;
+
+                // Validate all required fields
+                const requiredFields = form.querySelectorAll('[required]');
+                requiredFields.forEach(field => {
+                    if (!validateField(field)) {
+                        isValid = false;
+                        if (!firstErrorField) {
+                            firstErrorField = field;
+                        }
+                    }
+                });
+
+                if (!isValid) {
+                    e.preventDefault();
+                    showError('Please fill all required fields correctly');
+
+                    // Scroll to first error
+                    if (firstErrorField) {
+                        firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        firstErrorField.focus();
+                    }
+
+                    // Shake effect for error
+                    form.classList.add('shake');
+                    setTimeout(() => {
+                        form.classList.remove('shake');
+                    }, 500);
+                } else {
+                    // Show loading state
+                    const submitBtn = form.querySelector('.btn-submit');
+                    const originalText = submitBtn.innerHTML;
+                    const loadingOverlay = document.getElementById('loadingOverlay');
+
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                    submitBtn.disabled = true;
+
+                    // Show full screen loading overlay
+                    if (loadingOverlay) {
+                        loadingOverlay.classList.add('active');
+                    }
+
+                    // Reset if something goes wrong (timeout)
+                    setTimeout(() => {
+                        if (loadingOverlay) loadingOverlay.classList.remove('active');
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                    }, 30000); // 30 second safety reset
+                }
+            });
+        }
+
+        function showError(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                text: message,
+                confirmButtonColor: 'var(--accent-color, #2563eb)',
+                timer: 3000,
+                timerProgressBar: true
+            });
+        }
+
+        // Initialize progress
+        updateFormProgress();
+
+        // Shake animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+                20%, 40%, 60%, 80% { transform: translateX(5px); }
+            }
+            
+            .shake {
+                animation: shake 0.5s ease;
+            }
+            
+            .form-group.focused .form-control {
+                border-color: var(--secondary-color);
+            }
+            
+            .has-error .form-control {
+                border-color: var(--accent-color);
+            }
+            
+            .error-message.user {
+                color: var(--accent-color);
+            }
+        `;
+        document.head.appendChild(style);
+    });
+</script>
+{% endblock %}

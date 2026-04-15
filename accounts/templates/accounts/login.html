@@ -1,0 +1,311 @@
+{% extends "accounts/base.html" %}
+{% block title %}Login - LocateNow{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary: #1e293b;
+        --accent: #2563eb;
+        --muted: #64748b;
+        --bg: #f8fafc;
+        --card: #ffffff;
+        --error: #dc2626;
+        --success: #16a34a;
+        --radius: 12px;
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    html,
+    body {
+        height: 100%;
+        margin: 0;
+        background: var(--bg);
+        /* overflow: hidden; */
+        font-family: Inter, system-ui, sans-serif;
+    }
+
+    .auth-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        height: 100vh;
+    }
+
+    /* LEFT – FORM */
+    .auth-panel {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--card);
+    }
+
+    .auth-box {
+        width: 100%;
+        max-width: 420px;
+        padding: 2.5rem;
+    }
+
+    .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.7rem;
+        font-weight: 800;
+        color: var(--primary);
+        margin-bottom: 2rem;
+    }
+
+    .brand i {
+        color: var(--accent);
+    }
+
+    .auth-box h1 {
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .auth-box p {
+        color: var(--muted);
+        margin-bottom: 2rem;
+    }
+
+    /* FORM */
+    .form-group {
+        margin-bottom: 1.4rem;
+    }
+
+    label {
+        display: block;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 0.4rem;
+    }
+
+    input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border-radius: var(--radius);
+        border: 1px solid #cbd5e1;
+        font-size: 1rem;
+    }
+
+    input:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    /* PASSWORD TOGGLE */
+    .password-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        width: 100%;
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 12px;
+        cursor: pointer;
+        color: var(--muted);
+        font-size: 0.95rem;
+        padding: 5px;
+        z-index: 10;
+        transition: color 0.2s;
+    }
+
+    .password-toggle:hover {
+        color: var(--accent);
+    }
+
+    input[type="password"],
+    input[type="text"].password-field {
+        padding-right: 40px;
+    }
+
+    .auth-btn {
+        width: 100%;
+        padding: 0.85rem;
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-radius: var(--radius);
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .auth-btn:hover {
+        background: #1d4ed8;
+    }
+
+    /* MESSAGES */
+    .alert {
+        padding: 0.8rem 1rem;
+        border-radius: var(--radius);
+        margin-bottom: 1.2rem;
+        font-size: 0.9rem;
+    }
+
+    .alert-error {
+        background: #fee2e2;
+        color: var(--error);
+    }
+
+    .alert-success {
+        background: #dcfce7;
+        color: var(--success);
+    }
+
+    /* FOOTER */
+    .auth-footer {
+        margin-top: 1.8rem;
+        text-align: center;
+        font-size: 0.95rem;
+    }
+
+    .auth-footer a {
+        color: var(--accent);
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    /* RIGHT – ILLUSTRATION */
+    .visual-panel {
+        background: linear-gradient(135deg, #1e293b, #020617);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem;
+    }
+
+    .visual-content {
+        max-width: 480px;
+        text-align: center;
+    }
+
+    .visual-content svg {
+        width: 220px;
+        margin-bottom: 2rem;
+    }
+
+    .visual-content h2 {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    .visual-content p {
+        color: #cbd5e1;
+        line-height: 1.6;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+        .auth-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .visual-panel {
+            display: none;
+        }
+    }
+</style>
+
+<div class="auth-layout">
+
+    <!-- LOGIN FORM -->
+    <div class="auth-panel">
+        <div class="auth-box">
+
+            <div class="brand">
+                <i class="fas fa-people-arrows"></i>
+                LocateNow
+            </div>
+
+            <h1>Welcome back</h1>
+            <p>Sign in to continue your work.</p>
+
+            {% if form.errors %}
+            <div class="alert alert-error">
+                Invalid username or password.
+            </div>
+            {% endif %}
+
+            {% for message in messages %}
+            {% if message.tags == 'error' %}
+            <div class="alert alert-error">{{ message }}</div>
+            {% elif message.tags == 'success' %}
+            <div class="alert alert-success">{{ message }}</div>
+            {% endif %}
+            {% endfor %}
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label for="username">Username or Email</label>
+                    <input type="text" name="username" id="username" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" name="password" id="password" required>
+                        <i class="fas fa-eye password-toggle" id="togglePassword"></i>
+                    </div>
+                </div>
+
+                <button class="auth-btn" type="submit">
+                    Sign In
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                Don’t have an account?
+                <a href="{% url 'register' %}">Create one</a>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- VISUAL SIDE -->
+    <div class="visual-panel">
+        <div class="visual-content">
+
+            <!-- Inline SVG (no external image) -->
+            <svg viewBox="0 0 200 200" fill="none">
+                <circle cx="100" cy="100" r="90" stroke="#2563eb" stroke-width="6" />
+                <path d="M60 100 L90 130 L140 70" stroke="#22c55e" stroke-width="8" fill="none" />
+            </svg>
+
+            <h2>Reuniting families matters</h2>
+            <p>
+                Every verified login strengthens the network helping people
+                reconnect with loved ones.
+            </p>
+
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggle = document.getElementById('togglePassword');
+            const input = document.getElementById('password');
+
+            if (toggle && input) {
+                toggle.addEventListener('click', function () {
+                    const isPassword = input.getAttribute('type') === 'password';
+                    input.setAttribute('type', isPassword ? 'text' : 'password');
+
+                    // Toggle icon
+                    this.classList.toggle('fa-eye');
+                    this.classList.toggle('fa-eye-slash');
+                });
+            }
+        });
+    </script>
+</div>
+{% endblock %}

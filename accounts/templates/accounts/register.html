@@ -1,0 +1,413 @@
+{% extends "accounts/base.html" %}
+{% block title %}Register - LocateNow{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary: #1e293b;
+        --accent: #2563eb;
+        --muted: #64748b;
+        --bg: #f1f5f9;
+        --card: #ffffff;
+        --error: #dc2626;
+        --radius: 14px;
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    html,
+    body {
+        margin: 0;
+        background: var(--bg);
+        font-family: Inter, system-ui, sans-serif;
+    }
+
+    /* LAYOUT */
+    .auth-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        min-height: 100vh;
+    }
+
+    /* LEFT FORM SIDE */
+    .auth-panel {
+        background: var(--bg);
+        display: flex;
+        justify-content: center;
+        overflow-y: auto;
+        padding: 3rem 0;
+    }
+
+    .auth-box {
+        width: 100%;
+        max-width: 520px;
+        background: var(--card);
+        border-radius: 18px;
+        padding: 2.5rem;
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
+    }
+
+    /* BRAND */
+    .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: var(--primary);
+        margin-bottom: 1.5rem;
+    }
+
+    .brand i {
+        color: var(--accent);
+    }
+
+    .auth-box h1 {
+        font-size: 1.9rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .auth-box p {
+        color: var(--muted);
+        margin-bottom: 2rem;
+        font-size: 0.95rem;
+    }
+
+    /* ALERT */
+    .alert {
+        background: #fee2e2;
+        color: var(--error);
+        padding: 0.9rem 1rem;
+        border-radius: var(--radius);
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+    }
+
+    /* FORM */
+    form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-section {
+        background: #f8fafc;
+        border-radius: 14px;
+        padding: 1.5rem;
+        margin-bottom: 1.6rem;
+    }
+
+    .form-section h3 {
+        margin: 0 0 1.2rem 0;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--primary);
+        border-left: 4px solid var(--accent);
+        padding-left: 0.6rem;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group.full {
+        grid-column: span 2;
+    }
+
+    label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 0.4rem;
+    }
+
+    input {
+        width: 100%;
+        padding: 0.75rem 0.9rem;
+        border-radius: var(--radius);
+        border: 1px solid #cbd5e1;
+        font-size: 0.95rem;
+        background: #ffffff;
+    }
+
+    input:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    /* PASSWORD TOGGLE */
+    .password-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        width: 100%;
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 12px;
+        cursor: pointer;
+        color: var(--muted);
+        font-size: 0.95rem;
+        padding: 5px;
+        z-index: 10;
+        transition: color 0.2s;
+    }
+
+    .password-toggle:hover {
+        color: var(--accent);
+    }
+
+    input[type="password"],
+    input[type="text"].password-field {
+        padding-right: 40px;
+    }
+
+    /* BUTTON */
+    .auth-btn {
+        margin-top: 1.2rem;
+        padding: 1rem;
+        background: var(--accent);
+        color: #ffffff;
+        border: none;
+        border-radius: var(--radius);
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+    }
+
+    .auth-btn:hover {
+        background: #1d4ed8;
+    }
+
+    /* FOOTER */
+    .auth-footer {
+        margin-top: 1.4rem;
+        text-align: center;
+        font-size: 0.9rem;
+    }
+
+    .auth-footer a {
+        color: var(--accent);
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    /* RIGHT VISUAL */
+    .visual-panel {
+        background: linear-gradient(135deg, #1e293b, #020617);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+    }
+
+    .visual-content {
+        max-width: 460px;
+        text-align: center;
+        padding: 2rem;
+    }
+
+    .visual-content svg {
+        width: 220px;
+        margin-bottom: 2rem;
+    }
+
+    .visual-content h2 {
+        font-size: 2.1rem;
+        margin-bottom: 1rem;
+    }
+
+    .visual-content p {
+        color: #cbd5e1;
+        line-height: 1.6;
+        font-size: 1rem;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+        .auth-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .visual-panel {
+            display: none;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="auth-layout">
+
+    <!-- LEFT FORM -->
+    <div class="auth-panel">
+        <div class="auth-box">
+
+            <div class="brand">
+                <i class="fas fa-people-arrows"></i>
+                LocateNow
+            </div>
+
+            <h1>Create account</h1>
+            <p>Provide accurate details to help keep the platform trusted.</p>
+
+            {% if form.errors %}
+            <div class="alert">
+                Please correct the errors below.
+            </div>
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+
+                <!-- PERSONAL -->
+                <div class="form-section">
+                    <h3>Personal Details</h3>
+
+                    <div class="form-group full">
+                        <label>Full Name</label>
+                        {{ form.full_name }}
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Username</label>
+                            {{ form.username }}
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            {{ form.email }}
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Mobile</label>
+                            {{ form.mobile }}
+                        </div>
+                        <div class="form-group">
+                            <label>Pincode</label>
+                            {{ form.pincode }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ADDRESS -->
+                <div class="form-section">
+                    <h3>Address</h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>City</label>
+                            {{ form.city }}
+                        </div>
+                        <div class="form-group">
+                            <label>District</label>
+                            {{ form.district }}
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>State</label>
+                            {{ form.state }}
+                        </div>
+                        <div class="form-group">
+                            <label>Country</label>
+                            {{ form.country }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECURITY -->
+                <div class="form-section">
+                    <h3>Security</h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Password</label>
+                            <div class="password-wrapper">
+                                {{ form.password1 }}
+                                <i class="fas fa-eye password-toggle" id="togglePassword1"></i>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm Password</label>
+                            <div class="password-wrapper">
+                                {{ form.password2 }}
+                                <i class="fas fa-eye password-toggle" id="togglePassword2"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="auth-btn">
+                    Create Account
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                Already registered?
+                <a href="{% url 'login' %}">Login</a>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- RIGHT VISUAL -->
+    <div class="visual-panel">
+        <div class="visual-content">
+            <svg viewBox="0 0 200 200" fill="none">
+                <circle cx="100" cy="100" r="90" stroke="#2563eb" stroke-width="6" />
+                <path d="M50 110 C80 150, 120 150, 150 100" stroke="#22c55e" stroke-width="7" fill="none" />
+            </svg>
+
+            <h2>Trust starts with identity</h2>
+            <p>
+                Accurate registration enables faster verification and stronger
+                connections for families seeking reunion.
+            </p>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script>
+        function setupPasswordToggle(toggleId, inputId) {
+            const toggle = document.getElementById(toggleId);
+            const input = document.getElementById(inputId);
+
+            if (toggle && input) {
+                toggle.addEventListener('click', function () {
+                    const isPassword = input.getAttribute('type') === 'password';
+                    input.setAttribute('type', isPassword ? 'text' : 'password');
+
+                    // Toggle icon
+                    this.classList.toggle('fa-eye');
+                    this.classList.toggle('fa-eye-slash');
+                });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            setupPasswordToggle('togglePassword1', '{{ form.password1.id_for_label }}');
+            setupPasswordToggle('togglePassword2', '{{ form.password2.id_for_label }}');
+        });
+    </script>
+</div>
+{% endblock %}
